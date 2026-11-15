@@ -780,6 +780,9 @@ static uint64_t ui_node(const Cpu *c) {
 // An element as wide as the canvas counts as wide on the side its origin lies on: the Map menu's drifting cloud layers
 // are such elements placed past both side lines, and with its list panel on the left the menu went wholly to the left
 // half of a 32:9 frame (#55). The minimap's ring is one too, but nothing of its layout is wide on the left.
+// A piece of a side layout that spans the centre of the canvas, within UI_EDGE_STAY, stays there: the Area Map's region
+// title shares its layout with the zoom control and the Current Location panel on the right, and went to the right edge
+// with them (#55).
 // What the game places from the world must stay where the 3D view shows it, and XC3 needs more than XCX here:
 // - A layout the game places as a whole holds its position in its root transform (layout + 0x100, x and y in canvas
 //   units; zero for the HUD): the icon of a far target over the field. It never moves to a side.
@@ -874,6 +877,7 @@ static float ui_shift(uint64_t node, float lo, float hi, int wide, float k) {
     if (!seen[i].have)   // the node's first frame: what it has drawn so far
         seen[i].side = ui_spans(seen[i].lw, seen[i].rw) ? 0
                      : ui_side_for(seen[i].side, ui_median(seen[i].c, seen[i].n), seen[i].lo, seen[i].hi, 0);
+    if (lo < 0 && hi > 0 && fabsf(centre) < UI_EDGE_STAY) return 0;   // a piece on the centre of a side layout stays
     return seen[i].side < 0 ? k - 1 : seen[i].side > 0 ? 1 - k : 0;
 }
 
